@@ -92,7 +92,7 @@ def verifyInsertion(connection: Connection): Unit = {
     // Establish a connection
     val url = "jdbc:mysql://scaladb.mysql.database.azure.com:3306/shraman_jana"
     val username = "mysqladmin"
-    val password = "Password@12345"
+    val password = ""
     val connection: Connection = DriverManager.getConnection(url, username, password)
     try {
 
