@@ -22,13 +22,6 @@ class RoomController @Inject()(
                                 kafkaProducerService: KafkaProducerService
                               )(implicit ec: ExecutionContext) extends BaseController with Logging {
 
-  // Trigger manual execution of the room status update task
-  def triggerRoomStatusUpdate: Action[AnyContent] = Action.async {
-    roomStatusUpdateTask.checkAndUpdateRoomAndGuestStatus().map { _ =>
-      Ok(Json.obj("message" -> "Cron job triggered manually"))
-    }
-  }
-
   // API to get available rooms by type
   def getAvailableRoomsByType(roomType: String): Action[AnyContent] = Action.async {
     roomRepository.getAvailableRoomsByType(roomType).map { rooms =>

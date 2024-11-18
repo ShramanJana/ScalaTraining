@@ -5,12 +5,10 @@
 
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.index()
-GET   /rooms/available/:roomType    controllers.RoomController.getAvailableRoomsByType(roomType: String)
-POST   /rooms/allocate              controllers.RoomController.allocateRoom
-POST   /booking/checkout   controllers.RoomController.checkoutGuest
-GET   /test/trigger-cron   controllers.RoomController.triggerRoomStatusUpdate
-GET     /guests/active               controllers.GuestController.getActiveGuests
-
+GET     /api/v1/rooms/available/:roomType   controllers.RoomController.getAvailableRoomsByType(roomType: String)
+POST    /api/v1/rooms/allocate              controllers.RoomController.allocateRoom
+POST    /api/v1/booking/checkout            controllers.RoomController.checkoutGuest
+GET     /api/v1/guests/active               controllers.GuestController.getActiveGuests
 
 
 # Map static resources from the /public folder to the /assets URL path
