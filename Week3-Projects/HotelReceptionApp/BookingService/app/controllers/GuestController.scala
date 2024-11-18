@@ -9,10 +9,7 @@ import play.api.libs.json.Json
 import play.api.Logging
 
 @Singleton
-class GuestController @Inject()(
-                                 val controllerComponents: ControllerComponents,
-                                 val guestRepository: GuestRepository
-                               )(implicit ec: ExecutionContext) extends BaseController with Logging {
+class GuestController @Inject()(val controllerComponents: ControllerComponents, val guestRepository: GuestRepository)(implicit ec: ExecutionContext) extends BaseController with Logging {
 
   def getActiveGuests: Action[AnyContent] = Action.async {
     guestRepository.getActiveGuests.map { guests =>

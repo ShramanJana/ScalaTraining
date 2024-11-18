@@ -8,15 +8,11 @@ import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
 import java.time.LocalDate
 
 @Singleton
-class RoomStatusUpdateTask @Inject()(
-                                      bookingDetailsRepository: BookingDetailsRepository,
-                                      roomRepository: RoomRepository,
-                                      guestRepository: GuestRepository
-                                    )(implicit ec: ExecutionContext) extends Logging {
+class RoomStatusUpdateTask @Inject()(bookingDetailsRepository: BookingDetailsRepository, roomRepository: RoomRepository, guestRepository: GuestRepository)(implicit ec: ExecutionContext) extends Logging {
 
   private val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
 
-  // Schedule the cron job to run daily at midnight
+  // Schedule the cron job to run daily
   scheduler.scheduleAtFixedRate(() => checkAndUpdateRoomAndGuestStatus(), 0, 1, TimeUnit.DAYS)
 
   def checkAndUpdateRoomAndGuestStatus(): Future[Unit] = {
@@ -29,7 +25,7 @@ class RoomStatusUpdateTask @Inject()(
           // Step 1: Get the room number for the current room ID
           roomNoOption <- roomRepository.getRoomNoById(booking.roomId)
 
-          // Step 2: Update guest statuses to "INACTIVE" if roomNo is found
+          // Step 2: Update guest statuses to "INACTIVE"
           _ <- roomNoOption match {
             case Some(roomNo) =>
               guestRepository.updateGuestsStatusByRoomNo(roomNo, "INACTIVE")

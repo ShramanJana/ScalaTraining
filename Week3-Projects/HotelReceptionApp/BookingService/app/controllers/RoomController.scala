@@ -13,14 +13,9 @@ import java.util.Base64
 import java.time.LocalDate
 
 @Singleton
-class RoomController @Inject()(
-                                val controllerComponents: ControllerComponents,
-                                roomStatusUpdateTask: RoomStatusUpdateTask,
-                                roomRepository: RoomRepository,
-                                guestRepository: GuestRepository,
-                                bookingDetailsRepository: BookingDetailsRepository,
-                                kafkaProducerService: KafkaProducerService
-                              )(implicit ec: ExecutionContext) extends BaseController with Logging {
+class RoomController @Inject()(val controllerComponents: ControllerComponents, roomStatusUpdateTask: RoomStatusUpdateTask, roomRepository: RoomRepository,
+                               guestRepository: GuestRepository, bookingDetailsRepository: BookingDetailsRepository, kafkaProducerService: KafkaProducerService)
+                              (implicit ec: ExecutionContext) extends BaseController with Logging {
 
   // API to get available rooms by type
   def getAvailableRoomsByType(roomType: String): Action[AnyContent] = Action.async {
