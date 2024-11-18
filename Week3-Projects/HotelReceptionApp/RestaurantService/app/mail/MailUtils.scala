@@ -1,4 +1,4 @@
-package utils
+package mail
 
 import models.{Email, Guest, GuestInfo, Menu}
 
@@ -6,7 +6,7 @@ import java.util.Properties
 import javax.mail.internet.{InternetAddress, MimeMessage}
 import javax.mail.{Authenticator, Message, MessagingException, PasswordAuthentication, Session, Transport}
 
-object MailUtil {
+object MailUtils {
   val properties: Properties = new Properties()
   properties.put("mail.smtp.host", "smtp.gmail.com") // Replace with your SMTP server
   properties.put("mail.smtp.port", "587")
@@ -15,7 +15,7 @@ object MailUtil {
 
   val session = Session.getInstance(properties, new Authenticator() {
     override protected def getPasswordAuthentication =
-      new PasswordAuthentication("shramanjana2015@gmail.com", "igyq umhf jzoc rlfr")
+      new PasswordAuthentication("", "")
   })
 
   def composeMail(guest: GuestInfo, menuList: Seq[Menu]): Email = {
@@ -72,7 +72,7 @@ object MailUtil {
 
     try {
       val message = new MimeMessage(session)
-      message.setFrom(new InternetAddress("shramanjana2015@gmail.com"))
+      message.setFrom(new InternetAddress(""))
       message.setRecipients(Message.RecipientType.TO, email.receiverId)
       message.setSubject(email.subject)
       message.setContent(email.body, "text/html; charset=utf-8")

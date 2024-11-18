@@ -9,6 +9,6 @@ class RestaurantMailServiceScheduler @Inject()(guestService: GuestService){
   private val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
 
   // Schedule the cron job to run daily at midnight
-  scheduler.scheduleAtFixedRate(() => guestService.fetchGuestListAndSendMenu(), 0, 1, TimeUnit.HOURS)
+  scheduler.scheduleAtFixedRate(() => guestService.fetchGuestListAndSendMenu(), 0, 1, TimeUnit.DAYS)
 
 }

@@ -1,13 +1,14 @@
 package consumer
 
-import models.{Guest, GuestInfo, Menu, MenuDAO}
+import models.{Guest, GuestInfo, Menu}
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.pekko.Done
 import org.apache.pekko.actor.CoordinatedShutdown
 import play.api.Logging
 import play.api.libs.json.{Format, Json}
-import utils.MailUtil.composeAndSendEmail
+import mail.MailUtils.composeAndSendEmail
+import repositories.MenuRepository
 
 import java.time.Duration
 import java.util.Properties
@@ -19,19 +20,19 @@ import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success}
 
 @Singleton
-class RestaurantKafkaConsumer @Inject()(menuDAO: MenuDAO, coordinatedShutdown: CoordinatedShutdown) extends Logging {
+class RestaurantKafkaConsumer @Inject()(menuDAO: MenuRepository, coordinatedShutdown: CoordinatedShutdown) extends Logging {
 
   logger.info("Starting RestaurantKafkaConsumer")
   implicit val GuestFormat: Format[Guest] = Json.format[Guest]
   private  val properties = new Properties()
   properties.put("bootstrap.servers", "localhost:9092")
-  properties.put("group.id", s"restaurantService")
+  properties.put("group.id", s"restaurantService1")
   properties.put("key.deserializer", classOf[StringDeserializer])
   properties.put("value.deserializer", classOf[StringDeserializer])
 
   private val stopConsumer: AtomicBoolean = new AtomicBoolean(false)
   private val executionContext: ExecutionContext = ExecutionContext.fromExecutor(Executors.newSingleThreadExecutor())
-  private val mailExecutionContext: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(3))
+  private val mailExecutionContext: ExecutionContext = ExecutionContext.fromExecutor(Executors.newSingleThreadExecutor())
   val kafkaConsumer = new KafkaConsumer[String, String](properties)
   kafkaConsumer.subscribe(Set("hotel_originals_reception").asJava)
 
