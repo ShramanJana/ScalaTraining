@@ -2,7 +2,7 @@ package models
 
 import play.api.libs.json._
 
-case class Room(id: Int, roomName: String, capacity: Int, location: String)
+case class Room(id: Int, roomName: String, capacity: Int, location: String, createdBy: Int)
 
 object Room {
   implicit val roomFormat: OFormat[Room] = Json.format[Room]

@@ -2,13 +2,13 @@ package services
 
 import models.Reservation
 
-class NotificationService(emailService: EmailService) {
+class NotificationService {
 
   def sendBookingConfirmation(reservation: Reservation): Unit = {
-    emailService.sendBookingConfirmation(reservation)
+    sendBookingConfirmation(reservation)
   }
 
   def sendRoomPreparationNotification(reservation: Reservation): Unit = {
-    emailService.sendRoomPreparationNotification(reservation)
+    sendRoomPreparationNotification(reservation)
   }
 }

@@ -1,7 +1,7 @@
 package consumers
 
-import actors.{ReleaseActor, ReminderActor}
-import akka.actor.ActorSystem
+import actors.{BookingConfirmationActor, ReleaseActor, ReminderActor}
+import akka.actor.{ActorSystem, Props}
 import io.circe.parser.decode
 import models.Reservation
 import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
@@ -23,12 +23,12 @@ object BookingConfirmationConsumer {
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer].getName)
 
     val consumer = new KafkaConsumer[String, String](props)
-    consumer.subscribe(Collections.singletonList("reservation-created"))
+    consumer.subscribe(Collections.singletonList("meeting_reservation"))
 
-    val emailService = new EmailService()  // Instantiate the EmailService
     val roomService = new RoomService()    // Instantiate the RoomService
-    val reminderActor = system.actorOf(ReminderActor.props(emailService), "reminderActor") // Create ReminderActor
-    val releaseActor = system.actorOf(ReleaseActor.props(emailService, roomService), "releaseActor") // Create ReleaseActor
+    val reminderActor = system.actorOf(Props(new ReminderActor()), "reminderActor") // Create ReminderActor
+    val releaseActor = system.actorOf(Props(new ReleaseActor(roomService)), "releaseActor") // Create ReleaseActor
+    val bookingConfirmationActor = system.actorOf(Props(new BookingConfirmationActor()), "bookingConfirmationActor")
 
     system.log.info("Booking Confirmation Consumer started")
 
@@ -39,7 +39,7 @@ object BookingConfirmationConsumer {
         decode[Reservation](record.value()) match {
           case Right(reservation) =>
             system.log.info(s"Decoded reservation: $reservation") // Log successful decoding
-            system.actorSelection("/user/bookingConfirmationActor") ! reservation
+            bookingConfirmationActor ! reservation
 
             // Temporary testing: Reminder 10 seconds before start time
             val reminderTime = LocalDateTime.parse(reservation.startTime).minusSeconds(10)

@@ -10,12 +10,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ReservationController @Inject()(
-                                       cc: ControllerComponents,
-                                       reservationService: ReservationService,
-                                       roomService: RoomService,
-                                       userService: UserService
-                                     )(implicit ec: ExecutionContext) extends AbstractController(cc) {
+class ReservationController @Inject()(cc: ControllerComponents, reservationService: ReservationService, roomService: RoomService, userService: UserService)(implicit ec: ExecutionContext) extends AbstractController(cc) {
 
   // Implicit JSON format for Reservation and Room models
   implicit val reservationFormat: OFormat[Reservation] = Json.format[Reservation]
@@ -25,7 +20,7 @@ class ReservationController @Inject()(
   def reserveRoom: Action[JsValue] = Action.async(parse.json) { request =>
     request.body.validate[Reservation].fold(
       errors => {
-        Future.successful(BadRequest(Json.obj("error" -> "Invalid reservation data", "details" -> JsError.toJson(errors))))
+        Future.successful(BadRequest(Json.obj("error" -> "Invalid reservation data format", "errorMessage" -> JsError.toJson(errors))))
       },
       reservation => {
         // Check if the user has the AdminStaff role
@@ -35,7 +30,7 @@ class ReservationController @Inject()(
               case Some(savedReservation) =>
                 // Trigger Kafka event after successful reservation creation
                 val reservationData = Json.toJson(savedReservation).toString()
-                KafkaProducerUtil.sendMessage("reservation-created", savedReservation.id.toString, reservationData)
+                KafkaProducerUtil.sendMessage("meeting_reservation", savedReservation.id.toString, reservationData)
                 Created(Json.toJson(savedReservation))
               case None =>
                 Conflict(Json.obj("error" -> "Room is unavailable for the selected time"))
@@ -50,7 +45,7 @@ class ReservationController @Inject()(
   }
 
   // Endpoint to check available rooms for a given time range
-  def checkAvailability(startTime: String, endTime: String): Action[AnyContent] = Action.async {
+  def checkAvailableRooms(startTime: String, endTime: String): Action[AnyContent] = Action.async {
     roomService.findAvailableRooms(startTime, endTime).map { availableRooms =>
       Ok(Json.toJson(availableRooms))
     }

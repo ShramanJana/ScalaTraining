@@ -13,7 +13,7 @@ class ReservationService @Inject()(reservationRepository: ReservationRepository,
   def isRoomAvailable(roomId: Int, startTime: String, endTime: String): Future[Boolean] = {
     reservationRepository.findAvailableRooms(startTime, endTime).map { availableRooms =>
       // Use `filter` and `nonEmpty` to check if the roomId matches any available room
-      availableRooms.filter(room => room.id == roomId).nonEmpty
+      availableRooms.exists(_.id == roomId)
     }
   }
 
@@ -23,7 +23,7 @@ class ReservationService @Inject()(reservationRepository: ReservationRepository,
     isRoomAvailable(reservation.roomId, reservation.startTime, reservation.endTime).flatMap { available =>
       if (available) {
         reservationRepository.createReservation(reservation).map { reservationId =>
-          Some(reservation.copy(id = Some(reservationId)))
+          Some(reservation.copy(id = reservationId))
         }
       } else {
         Future.successful(None) // Return None if the room is not available
@@ -34,7 +34,7 @@ class ReservationService @Inject()(reservationRepository: ReservationRepository,
   // Create a new reservation without availability check
   def createReservation(reservation: Reservation): Future[Reservation] = {
     reservationRepository.createReservation(reservation).map { reservationId =>
-      reservation.copy(id = Some(reservationId)) // Return reservation with the generated ID
+      reservation.copy(id = reservationId) // Return reservation with the generated ID
     }
   }
 

@@ -1,6 +1,7 @@
 package consumers
 
-import akka.actor.ActorSystem
+import actors.RoomPreparationActor
+import akka.actor.{ActorSystem, Props}
 import io.circe.parser.decode
 import models.Reservation
 import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
@@ -19,7 +20,7 @@ object RoomPreparationConsumer {
 
     val consumer = new KafkaConsumer[String, String](props)
     consumer.subscribe(Collections.singletonList("reservation-created"))
-
+    val roomPreparationActor = system.actorOf(Props(new RoomPreparationActor()))
     system.log.info("Room Preparation Consumer started")
 
     while (true) {

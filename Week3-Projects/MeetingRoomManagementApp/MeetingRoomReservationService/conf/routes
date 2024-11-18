@@ -7,9 +7,13 @@
 GET     /                     controllers.HomeController.index()
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file                   controllers.Assets.versioned(path="/public", file: Asset)
 
-GET     /checkAvailability   controllers.ReservationController.checkAvailability(startTime: String, endTime: String)
-POST    /reserve             controllers.ReservationController.reserveRoom
-GET    /checkRoomAvailability    controllers.ReservationController.checkRoomAvailability(roomId: Int, startTime: String, endTime: String)
+GET     /api/v1/checkAvailability       controllers.ReservationController.checkAvailableRooms(startTime: String, endTime: String)
+POST    /api/v1/reserve                 controllers.ReservationController.reserveRoom
+GET     /api/v1/checkRoomAvailability   controllers.ReservationController.checkRoomAvailability(roomId: Int, startTime: String, endTime: String)
+POST    /api/v1/user                    controllers.AdminController.createNewUser
+PUT     /api/v1/user/:id                    controllers.AdminController.updateUser(id: Int)
+POST    /api/v1/room                    controllers.AdminController.addNewRoom
+PUT     /api/v1/room/:id                   controllers.AdminController.updateRoom(id: Int)
 

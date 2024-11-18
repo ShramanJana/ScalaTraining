@@ -3,14 +3,11 @@ package actors
 import akka.actor.{Actor, Props}
 import models.Reservation
 import services.EmailService
+import services.EmailService.sendRoomPreparationNotification
 
-class RoomPreparationActor(emailService: EmailService) extends Actor {
+class RoomPreparationActor extends Actor {
   def receive: Receive = {
     case reservation: Reservation =>
-      emailService.sendRoomPreparationNotification(reservation)
+      sendRoomPreparationNotification(reservation)
   }
-}
-
-object RoomPreparationActor {
-  def props(emailService: EmailService): Props = Props(new RoomPreparationActor(emailService))
 }

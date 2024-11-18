@@ -1,10 +1,50 @@
 package services
 
-import models.Reservation
+import models.{Email, Reservation}
+import javax.mail.internet.{InternetAddress, MimeMessage}
+import javax.mail._
+import java.util.Properties
 
-class EmailService {
+object EmailService {
+  val properties: Properties = new Properties()
+  properties.put("mail.smtp.host", "smtp.gmail.com") // Replace with your SMTP server
+  properties.put("mail.smtp.port", "587")
+  properties.put("mail.smtp.auth", "true")
+  properties.put("mail.smtp.starttls.enable", "true")
+
+  val session = Session.getInstance(properties, new Authenticator() {
+    override protected def getPasswordAuthentication =
+      new PasswordAuthentication("", "")
+  })
+  private def composeConfirmationMail(reservation: Reservation): Email = {
+    val body: String = s"Hi ${reservation.employeeName},\n\nMeeting Confirmed!!\n\nyour ${reservation.purpose} meeting room booking has been confirmed"
+    Email(reservation.employeeMail, "Meeting Reminder", body)
+  }
+
+  private def composeReminderMail(reservation: Reservation): Email = {
+    val body: String = s"Hi ${reservation.employeeName},\n\nGentle Reminder!!\n\nPlease join the ${reservation.purpose} meeting in 15 mins"
+    Email(reservation.employeeMail, "Meeting Reminder", body)
+  }
+
+  private def sendEmail(email: Email): Unit = {
+    try {
+      val message = new MimeMessage(session)
+      message.setFrom(new InternetAddress(""))
+      message.setRecipients(Message.RecipientType.TO, email.receiverId)
+      message.setSubject(email.subject)
+      message.setText(email.body)
+
+      Transport.send(message)
+      println(s"Email sent to ${email.receiverId}")
+    } catch {
+      case e: MessagingException =>
+        e.printStackTrace()
+    }
+  }
   def sendBookingConfirmation(reservation: Reservation): Unit = {
     println(s"Sending booking confirmation to ${reservation.employeeName} for reservation ID ${reservation.id}")
+    val email = composeConfirmationMail(reservation)
+    sendEmail(email)
   }
 
   def sendRoomPreparationNotification(reservation: Reservation): Unit = {
@@ -13,6 +53,8 @@ class EmailService {
 
   def sendReminder(reservation: Reservation): Unit = {
     println(s"Sending reminder to ${reservation.employeeName} for reservation ID ${reservation.id}")
+    val email = composeConfirmationMail(reservation)
+    sendEmail(email)
   }
 
   def sendReleaseNotification(reservation: Reservation): Unit = {

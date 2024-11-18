@@ -18,12 +18,21 @@ class UserRepository @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     def username = column[String]("username")
     def role = column[String]("role")
     def email = column[String]("email")
-    def * = (id, username, role, email) <> ((User.apply _).tupled, User.unapply)
+    def createdBy = column[Int]("created_by")
+    def * = (id, username, role, email, createdBy) <> ((User.apply _).tupled, User.unapply)
   }
 
   private val users = TableQuery[UserTable]
 
   def findById(userId: Int): Future[Option[User]] = {
     db.run(users.filter(_.id === userId).result.headOption)
+  }
+
+  def addNewUser(user: User): Future[Int] = db.run {
+    users.returning(users.map(_.id)) += user
+  }
+
+  def updateUser(id: Int, user: User): Future[Int] = db.run {
+    users.filter(_.id === id).update(user)
   }
 }

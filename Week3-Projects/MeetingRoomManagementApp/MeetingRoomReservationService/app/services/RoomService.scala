@@ -16,4 +16,11 @@ class RoomService @Inject()(roomRepository: RoomRepository)(implicit ec: Executi
   def findAvailableRooms(startTime: String, endTime: String): Future[List[Room]] = {
     roomRepository.findAvailableRooms(startTime, endTime).map(_.toList)
   }
+
+  def addNewRoom(room: Room): Future[Int] = {
+    roomRepository.addNewRoom(room)
+  }
+
+  def updateRoom(id: Int, room: Room) = roomRepository.updateRoom(id, room)
+
 }
