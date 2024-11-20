@@ -38,11 +38,7 @@ object BookingConfirmationConsumer {
             val reminderDelay = ChronoUnit.MILLIS.between(LocalDateTime.now(), reminderTime)
 
             if (reminderDelay > 0) {
-              system.scheduler.scheduleOnce(
-                reminderDelay.milliseconds,
-                reminderActor,
-                reservation
-              )(system.dispatcher)
+              system.scheduler.scheduleOnce(reminderDelay.milliseconds, reminderActor, reservation)(system.dispatcher)
               system.log.info(s"Scheduled reminder for reservation ID: ${reservation.id} at $reminderTime")
             } else {
               system.log.warning(s"Skipping reminder for reservation ID: ${reservation.id} as it's too close or past start time")
