@@ -12,10 +12,11 @@ object MailUtils {
   properties.put("mail.smtp.port", "587")
   properties.put("mail.smtp.auth", "true")
   properties.put("mail.smtp.starttls.enable", "true")
-
+  val senderMail: String = sys.env.getOrElse("SENDER_MAIL", "shramanjana2015@gmail.com")
+  val password: String = sys.env.getOrElse("SENDER_MAIL_PASSWORD", "")
   val session = Session.getInstance(properties, new Authenticator() {
     override protected def getPasswordAuthentication =
-      new PasswordAuthentication("", "")
+      new PasswordAuthentication(senderMail, password)
   })
 
   def composeMail(guest: GuestInfo, menuList: Seq[Menu]): Email = {
@@ -72,7 +73,7 @@ object MailUtils {
 
     try {
       val message = new MimeMessage(session)
-      message.setFrom(new InternetAddress(""))
+      message.setFrom(new InternetAddress(senderMail))
       message.setRecipients(Message.RecipientType.TO, email.receiverId)
       message.setSubject(email.subject)
       message.setContent(email.body, "text/html; charset=utf-8")
