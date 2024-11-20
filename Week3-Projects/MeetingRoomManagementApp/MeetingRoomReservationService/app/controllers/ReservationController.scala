@@ -1,13 +1,15 @@
 package controllers
 
-import models.{Reservation, Room}
+import models.{Reservation, Room, User}
 import play.api.libs.json._
 import play.api.mvc._
 import services.{ReservationService, RoomService, UserService}
 import utils.KafkaProducerUtil
 
+import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 @Singleton
 class ReservationController @Inject()(cc: ControllerComponents, reservationService: ReservationService, roomService: RoomService, userService: UserService)(implicit ec: ExecutionContext) extends AbstractController(cc) {
@@ -15,6 +17,7 @@ class ReservationController @Inject()(cc: ControllerComponents, reservationServi
   // Implicit JSON format for Reservation and Room models
   implicit val reservationFormat: OFormat[Reservation] = Json.format[Reservation]
   implicit val roomFormat: OFormat[Room] = Json.format[Room]
+  implicit val userFormat: OFormat[User] = Json.format[User]
 
   // Endpoint to reserve a room, restricted to AdminStaff role
   def reserveRoom: Action[JsValue] = Action.async(parse.json) { request =>
@@ -29,8 +32,15 @@ class ReservationController @Inject()(cc: ControllerComponents, reservationServi
             reservationService.reserveRoom(reservation).map {
               case Some(savedReservation) =>
                 // Trigger Kafka event after successful reservation creation
-                val reservationData = Json.toJson(savedReservation).toString()
-                KafkaProducerUtil.sendMessage("meeting_reservation", savedReservation.id.toString, reservationData)
+                val reservationData = Json.toJson(savedReservation).as[JsObject]
+                Await.result(userService.getUserById(reservation.employeeId), Duration.apply(3, TimeUnit.SECONDS)).foreach {
+                  employee: User =>
+                    val userData = Json.toJson(employee).as[JsObject]
+                    // merge user data and reservation data
+                    val kafkaMessage = reservationData.deepMerge(userData - "id").toString()
+                    KafkaProducerUtil.sendMessage("meeting_reservation", savedReservation.id.toString, kafkaMessage)
+                }
+
                 Created(Json.toJson(savedReservation))
               case None =>
                 Conflict(Json.obj("error" -> "Room is unavailable for the selected time"))

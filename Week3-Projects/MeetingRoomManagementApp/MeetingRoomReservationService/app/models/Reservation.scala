@@ -4,9 +4,7 @@ import play.api.libs.json.{Json, OFormat}
 
 case class Reservation(id: Int,
                        roomId: Int,
-                       employeeName: String,
-                       employeeMail: String,
-                       department: String,
+                       employeeId: Int,
                        purpose: String,
                        startTime: String,
                        endTime: String,

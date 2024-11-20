@@ -1,14 +1,8 @@
-import actors.{BookingConfirmationActor, RoomPreparationActor, SchedulerActor}
-import akka.actor.{ActorSystem, Props}
+import akka.actor.ActorSystem
 import consumers.{BookingConfirmationConsumer, RoomPreparationConsumer}
-import services.EmailService
 
 object Main extends App {
   implicit val system: ActorSystem = ActorSystem("NotificationSystem")
-
-  // Initialize actors with required parameters
-  val roomPreparationActor = system.actorOf(Props(new RoomPreparationActor), "roomPreparationActor")
-  val schedulerActor = system.actorOf(SchedulerActor.props(system), "schedulerActor")
 
   // Start Kafka consumers
   BookingConfirmationConsumer.startConsumer()

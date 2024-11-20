@@ -12,6 +12,7 @@ object KafkaConsumerUtil {
     props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId)
     props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer].getName)
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer].getName)
+    props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
     new KafkaConsumer[String, String](props)
   }
 }

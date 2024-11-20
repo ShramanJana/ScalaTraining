@@ -21,6 +21,6 @@ class RoomService @Inject()(roomRepository: RoomRepository)(implicit ec: Executi
     roomRepository.addNewRoom(room)
   }
 
-  def updateRoom(id: Int, room: Room) = roomRepository.updateRoom(id, room)
+  def updateRoom(id: Int, room: Room): Future[Int] = roomRepository.updateRoom(id, room)
 
 }

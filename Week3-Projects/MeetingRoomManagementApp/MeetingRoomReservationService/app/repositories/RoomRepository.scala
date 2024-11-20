@@ -29,15 +29,13 @@ class RoomRepository @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   class ReservationTable(tag: Tag) extends Table[Reservation](tag, "reservations") {
     def id = column[Int]("id", O.PrimaryKey)
     def roomId = column[Int]("room_id")
-    def employeeName = column[String]("employee_name")
-    def employeeMail = column[String]("employee_mail")
-    def department = column[String]("department")
+    def employeeId = column[Int]("employee_id")
     def purpose = column[String]("purpose")
     def startTime = column[String]("start_time")
     def endTime = column[String]("end_time")
     def createdBy = column[Int]("created_by")
 
-    def * = (id, roomId, employeeName, employeeMail, department, purpose, startTime, endTime, createdBy) <> ((Reservation.apply _).tupled, Reservation.unapply)
+    def * = (id, roomId, employeeId, purpose, startTime, endTime, createdBy) <> ((Reservation.apply _).tupled, Reservation.unapply)
   }
 
   val reservations = TableQuery[ReservationTable]

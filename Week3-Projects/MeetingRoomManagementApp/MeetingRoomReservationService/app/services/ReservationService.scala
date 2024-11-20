@@ -31,13 +31,6 @@ class ReservationService @Inject()(reservationRepository: ReservationRepository,
     }
   }
 
-  // Create a new reservation without availability check
-  def createReservation(reservation: Reservation): Future[Reservation] = {
-    reservationRepository.createReservation(reservation).map { reservationId =>
-      reservation.copy(id = reservationId) // Return reservation with the generated ID
-    }
-  }
-
   def checkRoomAvailability(roomId: Int, startTime: String, endTime: String): Future[Boolean] = {
     reservationRepository.checkRoomAvailability(roomId, startTime, endTime)
   }

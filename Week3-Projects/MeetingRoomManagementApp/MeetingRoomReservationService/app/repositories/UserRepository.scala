@@ -19,7 +19,8 @@ class UserRepository @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     def role = column[String]("role")
     def email = column[String]("email")
     def createdBy = column[Int]("created_by")
-    def * = (id, username, role, email, createdBy) <> ((User.apply _).tupled, User.unapply)
+    def department = column[String]("department")
+    def * = (id, username, role, email, createdBy, department) <> ((User.apply _).tupled, User.unapply)
   }
 
   private val users = TableQuery[UserTable]

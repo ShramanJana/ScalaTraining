@@ -7,7 +7,8 @@ case class User(
                  username: String,
                  role: String, // Role can be 'AdminStaff', 'RoomService', or 'SystemAdmin'
                  email: String,
-                 createdBy: Int
+                 createdBy: Int,
+                 department: String
                )
 
 object User {
