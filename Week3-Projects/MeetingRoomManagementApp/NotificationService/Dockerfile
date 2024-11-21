@@ -15,5 +15,3 @@ RUN sbt compile
 
 # Command to run the application
 CMD ["sbt", "run"]
-
-# docker run -d -e BROKER_HOST=205.34.345.50 consumer-image

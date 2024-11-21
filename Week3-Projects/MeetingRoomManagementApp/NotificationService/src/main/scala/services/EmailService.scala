@@ -12,9 +12,11 @@ object EmailService {
   properties.put("mail.smtp.auth", "true")
   properties.put("mail.smtp.starttls.enable", "true")
 
+  val senderMail: String = sys.env.getOrElse("SENDER_MAIL", "shramanjana2015@gmail.com")
+  val password: String = sys.env.getOrElse("SENDER_MAIL_PASSWORD", "")
   private val session = Session.getInstance(properties, new Authenticator() {
     override protected def getPasswordAuthentication =
-      new PasswordAuthentication("", "")
+      new PasswordAuthentication(senderMail, password)
   })
   private def composeConfirmationMail(reservation: Reservation): Email = {
     val body: String = s"Hi ${reservation.username},\n\nMeeting Confirmed!!\n\nyour ${reservation.purpose} meeting room booking has been confirmed"
@@ -29,7 +31,7 @@ object EmailService {
   private def sendEmail(email: Email): Unit = {
     try {
       val message = new MimeMessage(session)
-      message.setFrom(new InternetAddress(""))
+      message.setFrom(new InternetAddress(senderMail))
       message.setRecipients(Message.RecipientType.TO, email.receiverId)
       message.setSubject(email.subject)
       message.setText(email.body)
