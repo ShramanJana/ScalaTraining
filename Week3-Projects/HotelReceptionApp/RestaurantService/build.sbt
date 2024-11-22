@@ -20,7 +20,9 @@ libraryDependencies ++= Seq(
   "org.playframework" %% "play-slick"            % "6.1.0",
   "org.playframework" %% "play-slick-evolutions" % "6.1.0",
   "mysql" % "mysql-connector-java" % "8.0.26",
-  "com.sun.mail" % "javax.mail" % "1.6.2" // for JavaMail
+  "com.sun.mail" % "javax.mail" % "1.6.2", // for JavaMail
+  "com.auth0" % "java-jwt" % "4.3.0", // Java JWT library
+  "org.mindrot" % "jbcrypt" % "0.3m"
 )
 libraryDependencies += "org.apache.kafka" % "kafka-clients" % "3.0.0"
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.2"

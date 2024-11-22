@@ -9,6 +9,8 @@ GET     /api/v1/rooms/available/:roomType   controllers.RoomController.getAvaila
 POST    /api/v1/rooms/allocate              controllers.RoomController.allocateRoom
 POST    /api/v1/booking/checkout            controllers.RoomController.checkoutGuest
 GET     /api/v1/guests/active               controllers.GuestController.getActiveGuests
+POST    /api/v1/login                       controllers.AuthController.login
+POST    /api/v1/register                    controllers.AuthController.register
 
 
 # Map static resources from the /public folder to the /assets URL path

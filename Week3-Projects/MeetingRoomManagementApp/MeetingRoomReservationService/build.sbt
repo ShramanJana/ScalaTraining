@@ -12,7 +12,9 @@ libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.0
 libraryDependencies ++= Seq(
   "org.playframework" %% "play-slick"            % "6.1.0",    // Enables to work with database
   "org.playframework" %% "play-slick-evolutions" % "6.1.0",    // Support for database migrations, similar to Flyway
-  "mysql" % "mysql-connector-java" % "8.0.26"
+  "mysql" % "mysql-connector-java" % "8.0.26",
+  "com.auth0" % "java-jwt" % "4.3.0", // Java JWT library
+  "org.mindrot" % "jbcrypt" % "0.3m"
 )
 
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.2"

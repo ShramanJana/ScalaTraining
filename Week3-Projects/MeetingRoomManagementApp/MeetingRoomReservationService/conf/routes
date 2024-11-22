@@ -13,7 +13,9 @@ GET     /api/v1/checkAvailability       controllers.ReservationController.checkA
 POST    /api/v1/reserve                 controllers.ReservationController.reserveRoom
 GET     /api/v1/checkRoomAvailability   controllers.ReservationController.checkRoomAvailability(roomId: Int, startTime: String, endTime: String)
 POST    /api/v1/user                    controllers.AdminController.createNewUser
-PUT     /api/v1/user/:id                    controllers.AdminController.updateUser(id: Int)
+PUT     /api/v1/user/:id                controllers.AdminController.updateUser(id: Int)
 POST    /api/v1/room                    controllers.AdminController.addNewRoom
-PUT     /api/v1/room/:id                   controllers.AdminController.updateRoom(id: Int)
+PUT     /api/v1/room/:id                controllers.AdminController.updateRoom(id: Int)
+POST    /api/v1/login                   controllers.AuthController.login
+POST    /api/v1/register                controllers.AuthController.register
 
