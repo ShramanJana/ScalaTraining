@@ -25,7 +25,7 @@ class RestaurantKafkaConsumer @Inject()(menuDAO: MenuRepository, coordinatedShut
   logger.info("Starting RestaurantKafkaConsumer")
   implicit val GuestFormat: Format[Guest] = Json.format[Guest]
   private  val properties = new Properties()
-  properties.put("bootstrap.servers", sys.env.getOrElse("BOOTSTRAP_SERVER", "localhost:9092"))
+  properties.put("bootstrap.servers", sys.env.getOrElse("KAFKA_BROKER_HOST", "localhost:9092"))
   properties.put("group.id", s"restaurantService1")
   properties.put("key.deserializer", classOf[StringDeserializer])
   properties.put("value.deserializer", classOf[StringDeserializer])

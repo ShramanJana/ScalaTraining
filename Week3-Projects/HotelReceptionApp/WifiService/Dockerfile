@@ -7,9 +7,6 @@ WORKDIR /app
 # Copy the entire project into the Docker image
 COPY . /app
 
-ENV BROKER_HOST="34.136.75.4"
-ENV SENDER_MAIL="shramanjana2015@gmail.com"
-ENV SENDER_MAIL_PASSWORD=""
 # Compile the Scala application
 RUN sbt compile
 

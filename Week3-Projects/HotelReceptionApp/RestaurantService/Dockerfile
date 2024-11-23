@@ -24,11 +24,6 @@ EXPOSE 9000
 
 # Define environment variable
 ENV PLAY_HTTP_SECRET=thisisasecretfortheapplicationandwekeepittosecuretheapplicationletuscheckandithastoworkagain
-ENV BOOTSTRAP_SERVER="34.136.75.4:9092"
-ENV SENDER_MAIL="shramanjana2015@gmail.com"
-ENV SENDER_MAIL_PASSWORD=""
-ENV JWT_SECRET_KEY=""
-ENV JWT_ISSUER=""
 
 # Run the binary script when the container launches
 CMD ["./bin/restaurantservice", "-Dplay.http.secret.key=thisisasecretfortheapplicationandwekeepittosecuretheapplicationletuscheckandithastoworkagain"]

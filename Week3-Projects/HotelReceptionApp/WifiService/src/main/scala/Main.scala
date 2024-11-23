@@ -19,7 +19,7 @@ object Main {
     implicit val system: ActorSystem[_] = ActorSystem(Behaviors.empty, "HotelRoomServiceNotification")
 
     val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
-      .withBootstrapServers(sys.env.get("BROKER_HOST").getOrElse("localhost")+":9092")
+      .withBootstrapServers(sys.env.getOrElse("KAFKA_BROKER_HOST", "localhost:9092"))
       .withGroupId("wifiServiceGroup")
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
 
