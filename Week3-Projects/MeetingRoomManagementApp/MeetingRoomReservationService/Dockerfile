@@ -24,8 +24,6 @@ EXPOSE 9000
 
 # Define environment variable
 ENV PLAY_HTTP_SECRET=thisisasecretfortheapplicationandwekeepittosecuretheapplicationletuscheckandithastowork
-ENV BROKER_HOST="34.136.75.4:9092"
-ENV JWT_SECRET_KEY=""
-ENV JWT_ISSUER=""
+
 # Run the binary script when the container launches
 CMD ["./bin/scala-play-starter", "-Dplay.http.secret.key=thisisasecretfortheapplicationandwekeepittosecuretheapplicationletuscheckandithastowork"]
