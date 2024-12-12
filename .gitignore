@@ -1,2 +1,5 @@
- .DS_Store
- Day3/.DS_Store
+.DS_Store
+Day3/.DS_Store
+**/target/**
+**/.idea
+**/.bsp
