@@ -89,7 +89,7 @@ object Main {
 
         // Aggregation Per Movie
         val perMovieMetricsDF = enrichedData.groupBy("movieId", "title", "genres").agg(
-          avg("rating").as("average_rating"),
+          round(avg("rating"), 2).as("average_rating"),
           count("rating").as("total_ratings")
         )
         perMovieMetricsDF.show(10, truncate = false)
@@ -100,7 +100,7 @@ object Main {
         val perGenreMetricsDF = enrichedData.withColumn("genre", explode(split(col("genres"), "\\|"))) // Split and explode genres
           .groupBy("genre")
           .agg(
-            avg("rating").as("average_rating"),
+            round(avg("rating"), 2).as("average_rating"),
             count("rating").as("total_ratings")
           )
         perGenreMetricsDF.show(10, truncate = false)
@@ -110,7 +110,7 @@ object Main {
         // Aggregation Per User Demographic
         val perDemographicMetricsDF = enrichedData.groupBy("age", "gender", "location")
           .agg(
-            avg("rating").as("average_rating"),
+            round(avg("rating"), 2).as("average_rating"),
             count("rating").as("total_ratings")
           )
         perDemographicMetricsDF.show(10, truncate = false)

@@ -1,13 +1,27 @@
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.HttpHeader
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpHeader}
+import akka.http.scaladsl.model.StatusCodes.OK
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.server.Directives._
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions.desc
+import spray.json._
 
 import javax.ws.rs._
 import scala.concurrent.ExecutionContextExecutor
+
+// Define case class and JSON format for serialization
+case class MovieMetrics(movieId: Int, title: String, genres: String, averageRating: Double, totalRating: Long)
+case class GenreMetrics(genre: String, averageRating: Double, totalRating: Long)
+case class DemographicMetrics(age: String, gender: String, location: String, averageRating: Double, totalRating: Long)
+
+// Spray-json format for case classes
+object MyJsonProtocol extends DefaultJsonProtocol {
+  implicit val movieMetricsFormat = jsonFormat5(MovieMetrics)
+  implicit val genreMetricsFormat = jsonFormat3(GenreMetrics)
+  implicit val demographicMetricsFormat = jsonFormat5(DemographicMetrics)
+}
 
 object Main {
   def main(args: Array[String]): Unit = {
@@ -25,12 +39,19 @@ object Main {
       .master("local[*]")
       .getOrCreate()
 
+    import MyJsonProtocol._
+
     // Paths to aggregated metrics
     val aggregatedDataPath = s"gs://$BUCKET_NAME/final_week_case_studies/movie_lens_analysis/output/aggregated-metrics"
 
     val perMovieMetricsPath = s"$aggregatedDataPath/per_movie_metrics"
     val perGenreMetricsPath = s"$aggregatedDataPath/per_genre_metrics"
     val perDemographicMetricsPath = s"$aggregatedDataPath/per_demographic_metrics"
+
+    // Load DataFrames for each dataset
+    def loadMovieMetrics(): DataFrame = spark.read.parquet(perMovieMetricsPath)
+    def loadGenreMetrics(): DataFrame = spark.read.parquet(perGenreMetricsPath)
+    def loadDemographicMetrics(): DataFrame = spark.read.parquet(perDemographicMetricsPath)
 
 //    val corsSettings = CorsSettings.defaultSettings
 //      .withAllowedOrigins(_ => true) // Allow all origins
@@ -51,30 +72,44 @@ object Main {
         concat(
           path("movie-metrics") {
             get {
-              val movieMetricsDF = spark.read.parquet(perMovieMetricsPath)
-              val movieMetrics = movieMetricsDF.sort(desc("average_rating")).collect().map(_.toString()).mkString("\n")
+              // Fetch movie metrics and return as JSON response
+              val movieMetricsDF = loadMovieMetrics()
+              val movieMetrics = movieMetricsDF.sort(desc("average_rating"))
+                .collect()
+                .map(row => MovieMetrics(row.getAs[Int]("movieId"), row.getAs[String]("title"), row.getAs[String]("genres"), row.getAs[Double]("average_rating"), row.getAs[Long]("total_ratings")))
+                .toList
+                .toJson
+                .prettyPrint
               respondWithHeaders(addCorsHeaders) {
-                complete(movieMetrics)
+                complete(OK, HttpEntity(ContentTypes.`application/json`, movieMetrics))
               }
             }
           },
           path("genre-metrics") {
             get {
-              val genreMetricsDF = spark.read.parquet(perGenreMetricsPath)
-              val genreMetrics = genreMetricsDF.sort(desc("average_rating")).collect().map(_.toString()).mkString("\n")
-
+              // Fetch genre metrics and return as JSON response
+              val genreMetricsDF = loadGenreMetrics()
+              val genreMetrics = genreMetricsDF.sort(desc("average_rating"))
+                .collect()
+                .map(row => GenreMetrics(row.getAs[String]("genre"), row.getAs[Double]("average_rating"), row.getAs[Long]("total_ratings")))
+                .toList
+                .toJson
+                .prettyPrint
               respondWithHeaders(addCorsHeaders) {
-                complete(genreMetrics)
+                complete(OK, HttpEntity(ContentTypes.`application/json`, genreMetrics))
               }
             }
           },
           path("demographics-metrics") {
             get {
-              val demographicMetricsDF = spark.read.parquet(perDemographicMetricsPath)
-              val demographicMetrics = demographicMetricsDF.sort(desc("average_rating")).collect().map(_.toString()).mkString("\n")
-
+              // Fetch demographic metrics and return as JSON response
+              val demographicMetricsDF = loadDemographicMetrics()
+              val demographicMetrics = demographicMetricsDF.sort(desc("average_rating")).collect().map(row => DemographicMetrics(row.getAs[String]("age"), row.getAs[String]("gender"), row.getAs[String]("location"), row.getAs[Double]("average_rating"), row.getAs[Long]("total_ratings")))
+                .toList
+                .toJson
+                .prettyPrint
               respondWithHeaders(addCorsHeaders) {
-                complete(demographicMetrics)
+                complete(OK, HttpEntity(ContentTypes.`application/json`, demographicMetrics))
               }
             }
           }
