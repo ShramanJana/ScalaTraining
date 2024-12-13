@@ -32,6 +32,29 @@ object KafkaConsumer {
       StructField("IsHoliday", BooleanType, nullable = false)
     ))
 
+    val featuresSchema = StructType(Seq(
+      StructField("Store", IntegerType),
+      StructField("Date", StringType),
+      StructField("Temperature", DoubleType),
+      StructField("Fuel_Price", DoubleType),
+      StructField("CPI", DoubleType),
+      StructField("Unemployment", DoubleType)
+    ))
+
+    val storesSchema = StructType(Seq(
+      StructField("Store", IntegerType),
+      StructField("Type", StringType),
+      StructField("Size", IntegerType)
+    ))
+
+    // Dataset paths
+    val featuresDatasetPath = s"gs://$BUCKET_NAME/final_week_case_studies/Walmart_Dataset_Analysis/Input_Datasets/features.csv"
+    val storesDatasetPath = s"gs://$BUCKET_NAME/final_week_case_studies/Walmart_Dataset_Analysis/Input_Datasets/stores.csv"
+    val enrichedDataOutputPath = s"gs://$BUCKET_NAME/final_week_case_studies/Walmart_Dataset_Analysis/output/enriched_data/"
+    val storeMetricsOutputPath = s"gs://$BUCKET_NAME/final_week_case_studies/Walmart_Dataset_Analysis/output/store_metrics/"
+    val deptMetricsOutputPath = s"gs://$BUCKET_NAME/final_week_case_studies/Walmart_Dataset_Analysis/output/dept_metrics/"
+    val holidayMetricsOutputPath = s"gs://$BUCKET_NAME/final_week_case_studies/Walmart_Dataset_Analysis/output/holiday_metrics/"
+
     // Starting Kafka Consumer
     val kafkaSource = spark.readStream
       .format("kafka")
@@ -51,24 +74,6 @@ object KafkaConsumer {
         val persistedBatchDf = batchDf.persist(StorageLevel.MEMORY_AND_DISK) // persisted with replication
         persistedBatchDf.show(5, truncate = false)
 
-        val featuresSchema = StructType(Seq(
-          StructField("Store", IntegerType),
-          StructField("Date", StringType),
-          StructField("Temperature", DoubleType),
-          StructField("Fuel_Price", DoubleType),
-          StructField("CPI", DoubleType),
-          StructField("Unemployment", DoubleType)
-        ))
-
-        val storesSchema = StructType(Seq(
-          StructField("Store", IntegerType),
-          StructField("Type", StringType),
-          StructField("Size", IntegerType)
-        ))
-
-        // Dataset paths
-        val featuresDatasetPath = s"gs://$BUCKET_NAME/final_week_case_studies/Walmart_Dataset_Analysis/Input_Datasets/features.csv"
-        val storesDatasetPath = s"gs://$BUCKET_NAME/final_week_case_studies/Walmart_Dataset_Analysis/Input_Datasets/stores.csv"
 
         val featuresDf = spark.read.option("header", "true").schema(featuresSchema).csv(featuresDatasetPath)
         val storesDf = spark.read.option("header", "true").schema(storesSchema).csv(storesDatasetPath)
@@ -84,7 +89,6 @@ object KafkaConsumer {
           .join(cleanedStoresDf, Seq("Store"), "inner") //inner join with Store data on "Store" column
 
         // write enriched
-        val enrichedDataOutputPath = s"gs://$BUCKET_NAME/final_week_case_studies/Walmart_Dataset_Analysis/output/enriched_data/"
         // append new data to the enriched path
         newEnrichedData.write.mode(SaveMode.Append).partitionBy("Store", "Date").parquet(enrichedDataOutputPath)
         println("Successfully saved new enriched data to GCP bucket")
@@ -103,7 +107,6 @@ object KafkaConsumer {
           avg("Weekly_Sales").as("Avg_Weekly_Sales")
         ).orderBy(desc("Total_Weekly_Sales")).cache()
 
-        val storeMetricsOutputPath = s"gs://$BUCKET_NAME/final_week_case_studies/Walmart_Dataset_Analysis/output/store_metrics/"
         storeMetrics.limit(100).write.mode(SaveMode.Overwrite).json(storeMetricsOutputPath)
         println("Successfully updated store metrics data to GCP bucket")
         storeMetrics.unpersist()
@@ -114,12 +117,11 @@ object KafkaConsumer {
 
         val deptMetrics = enrichedData.groupBy(col("Dept"), col("Date")).agg(
             sum("Weekly_Sales").as("Total_Weekly_Sales")
-          ).cache()
+          )
           .withColumn("Prev_Weekly_Sales", lag("Total_Weekly_Sales", 1).over(windowSpec)) // Get previous week's sales
           .withColumn("Weekly_Difference", col("Total_Weekly_Sales") - col("Prev_Weekly_Sales")) // Calculate difference
           .orderBy("Dept", "Date").cache()
 
-        val deptMetricsOutputPath = s"gs://$BUCKET_NAME/final_week_case_studies/Walmart_Dataset_Analysis/output/dept_metrics/"
         deptMetrics.limit(100).write.mode(SaveMode.Overwrite).json(deptMetricsOutputPath)
         println("Successfully updated department metrics data to GCP bucket")
         deptMetrics.unpersist()
@@ -135,7 +137,6 @@ object KafkaConsumer {
           .orderBy("Dept")
           .cache()
 
-        val holidayMetricsOutputPath = s"gs://$BUCKET_NAME/final_week_case_studies/Walmart_Dataset_Analysis/output/holiday_metrics/"
         holidayMetrics.limit(100).write.mode(SaveMode.Overwrite).json(holidayMetricsOutputPath)
         println("Successfully updated holiday metrics data to GCP bucket")
         holidayMetrics.unpersist()
@@ -144,7 +145,7 @@ object KafkaConsumer {
         batchDf.unpersist()
         println("Updation of metrics completed")
       }
-      .trigger(Trigger.ProcessingTime(6, TimeUnit.SECONDS)) // processing the data every 30 seconds
+      .trigger(Trigger.ProcessingTime(60, TimeUnit.SECONDS)) // processing the data every 60 seconds
       .start()
 
     query.awaitTermination()
