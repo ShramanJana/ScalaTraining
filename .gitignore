@@ -3,3 +3,5 @@ Day3/.DS_Store
 **/target/**
 **/.idea
 **/.bsp
+**/node_modules
+**/package-lock.json
