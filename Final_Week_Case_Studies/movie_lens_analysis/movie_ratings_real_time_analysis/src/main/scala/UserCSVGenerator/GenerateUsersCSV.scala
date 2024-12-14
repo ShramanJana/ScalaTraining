@@ -1,6 +1,9 @@
+package UserCSVGenerator
+
+import com.github.javafaker.Faker
+
 import java.io.{BufferedWriter, FileWriter}
 import scala.util.Random
-import com.github.javafaker.Faker
 
 object GenerateUsersCSV {
   def main(args: Array[String]): Unit = {
