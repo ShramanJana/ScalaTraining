@@ -107,6 +107,7 @@ object KafkaConsumer {
           avg("Weekly_Sales").as("Avg_Weekly_Sales")
         ).orderBy(desc("Total_Weekly_Sales")).cache()
 
+        storeMetrics.show(10, truncate = false)
         storeMetrics.limit(100).write.mode(SaveMode.Overwrite).json(storeMetricsOutputPath)
         println("Successfully updated store metrics data to GCP bucket")
         storeMetrics.unpersist()
@@ -122,6 +123,7 @@ object KafkaConsumer {
           .withColumn("Weekly_Difference", col("Total_Weekly_Sales") - col("Prev_Weekly_Sales")) // Calculate difference
           .orderBy("Dept", "Date").cache()
 
+        deptMetrics.show(10, truncate = false)
         deptMetrics.limit(100).write.mode(SaveMode.Overwrite).json(deptMetricsOutputPath)
         println("Successfully updated department metrics data to GCP bucket")
         deptMetrics.unpersist()
@@ -137,6 +139,7 @@ object KafkaConsumer {
           .orderBy("Dept")
           .cache()
 
+        holidayMetrics.show(10, truncate = false)
         holidayMetrics.limit(100).write.mode(SaveMode.Overwrite).json(holidayMetricsOutputPath)
         println("Successfully updated holiday metrics data to GCP bucket")
         holidayMetrics.unpersist()

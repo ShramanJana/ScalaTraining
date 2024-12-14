@@ -14,6 +14,8 @@ object Main {
       .config("spark.hadoop.fs.AbstractFileSystem.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS")
       .config("spark.hadoop.google.cloud.auth.service.account.enable", "true")
       .config("spark.hadoop.google.cloud.auth.service.account.json.keyfile", "/Users/shramanjana/gcp-final-key.json")
+//      .config("spark.driver.bindAddress", "127.0.0.1")
+//      .config("spark.driver.port", "6066")
       .master("local[*]")
       .getOrCreate()
 
@@ -54,6 +56,8 @@ object Main {
         // Read movie metadata from CSV
         val moviesDF = spark.read
           .option("header", "true")
+          .option("quote", "\"")         // Treat text inside quotes as a single field
+          .option("escape", "\"")
           .csv(s"gs://$BUCKET_NAME/final_week_case_studies/movie_lens_analysis/input_datasets/movies.csv")
           .selectExpr("cast(movieId as int) as movieId", "title", "genres").cache()
 
